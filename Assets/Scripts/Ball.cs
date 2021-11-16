@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class Ball : MonoBehaviour
 {
-    [SerializeField] private float speed;
+    [SerializeField][Range(50, 500)] private float speed;
 
     private Rigidbody2D _rigidbody;
     
