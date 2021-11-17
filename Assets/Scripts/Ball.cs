@@ -1,4 +1,5 @@
 using UnityEngine;
+using MoreMountains.NiceVibrations;
 
 public class Ball : MonoBehaviour
 {
@@ -57,6 +58,7 @@ public class Ball : MonoBehaviour
         if (other.gameObject.CompareTag("Brick"))
         {
             GameManager.Gm.AddScore(1);
+            MMVibrationManager.Haptic(HapticTypes.LightImpact);
             other.gameObject.SetActive(false);
         }
     }

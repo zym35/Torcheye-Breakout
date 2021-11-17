@@ -55,11 +55,11 @@ class GameManager : MonoBehaviour
         _brickPool = new List<GameObject>();
 
         GameObject temp;
-        for (var i = -4; i <= 4; i++)
+        for (var i = -10; i <= 10; i++)
         {
-            for (var j = -5; j <= 5; j++)
+            for (var j = -10; j <= 10; j++)
             {
-                temp = Instantiate(brickPrefab, new Vector2((float) i / 2, (float) j / 2), Quaternion.identity);
+                temp = Instantiate(brickPrefab, new Vector2((float) i / 5, (float) j / 4), Quaternion.identity);
                 //temp.SetActive(false);
                 _brickPool.Add(temp);
             }
