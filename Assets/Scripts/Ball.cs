@@ -24,6 +24,7 @@ public class Ball : MonoBehaviour
 
     private void LaunchPrep()
     {
+        var mousePos = _camera.ScreenToWorldPoint(Input.mousePosition);
         if (Input.GetMouseButtonDown(0))
         {
             GameManager.Gm.SetBallPreview(true);
@@ -31,13 +32,14 @@ public class Ball : MonoBehaviour
 
         if (Input.GetMouseButton(0))
         {
-            var mousePos = _camera.ScreenToWorldPoint(Input.mousePosition);
             GameManager.Gm.DrawBallPreview(transform.position, mousePos);
         }
 
         if (Input.GetMouseButtonUp(0))
         {
-            _rigidbody.AddForce((Input.mousePosition - transform.position).normalized * speed);
+            var dir = mousePos - transform.position;
+            //dir.Normalize();
+            _rigidbody.AddForce(dir * speed);
             GameManager.Gm.SetBallPreview(false);
             GameManager.InLaunchPrep = false;
         }
@@ -45,8 +47,16 @@ public class Ball : MonoBehaviour
 
     private void OnCollisionEnter2D(Collision2D other)
     {
+        // if (other.gameObject.CompareTag("Brick"))
+        // {
+        //     var vOther = other.relativeVelocity;
+        //     var normal = other.GetContact(0).normal;
+        //     other.rigidbody.velocity = Vector2.Reflect(vOther, normal);
+        //     other.gameObject.SetActive(false);
+        // }
         if (other.gameObject.CompareTag("Brick"))
         {
+            GameManager.Gm.AddScore(1);
             other.gameObject.SetActive(false);
         }
     }

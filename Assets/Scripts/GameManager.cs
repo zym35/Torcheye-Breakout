@@ -1,12 +1,18 @@
+using System;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
+using UnityEngine.SceneManagement;
+using UnityEngine.Serialization;
 
 class GameManager : MonoBehaviour
 {
     [SerializeField] private GameObject brickPrefab;
-    [SerializeField] private LineRenderer _ballPreviewLineRenderer;
+    [SerializeField] private LineRenderer ballPreviewLineRenderer;
+    [SerializeField] private TextMeshProUGUI scoreDisplay;
 
     private List<GameObject> _brickPool;
+    private int _score;
     
     public static bool InLaunchPrep { get; set; }
     public static GameManager Gm { get; private set; }
@@ -30,6 +36,20 @@ class GameManager : MonoBehaviour
         InstantiateBlocks();
     }
 
+    private void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.R))
+        {
+            Restart();
+        }
+        scoreDisplay.text = _score.ToString();
+    }
+
+    public void Restart()
+    {
+        SceneManager.LoadScene(0);
+    }
+
     private void InstantiateBlocks()
     {
         _brickPool = new List<GameObject>();
@@ -48,12 +68,17 @@ class GameManager : MonoBehaviour
 
     public void SetBallPreview(bool active)
     {
-        _ballPreviewLineRenderer.enabled = active;
+        ballPreviewLineRenderer.enabled = active;
     }
 
     public void DrawBallPreview(Vector2 ballPos, Vector2 targetPos)
     {
-        _ballPreviewLineRenderer.SetPosition(0, ballPos);
-        _ballPreviewLineRenderer.SetPosition(1, targetPos);
+        ballPreviewLineRenderer.SetPosition(0, ballPos);
+        ballPreviewLineRenderer.SetPosition(1, targetPos);
+    }
+
+    public void AddScore(int num)
+    {
+        _score += num;
     }
 }
