@@ -18,6 +18,11 @@ public class Ball : MonoBehaviour
         {
             LaunchPrep();
         }
+
+        if (transform.position.y < -5)
+        {
+            GameManager.Instance.Fail();
+        }
     }
 
     private void LaunchPrep()

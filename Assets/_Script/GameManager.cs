@@ -1,8 +1,9 @@
+using System;
+using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
-using UnityEngine.Serialization;
 
 public class GameManager : MonoBehaviour
 {
@@ -10,14 +11,18 @@ public class GameManager : MonoBehaviour
     [SerializeField] private LineRenderer ballPreviewLineRenderer;
     [SerializeField] private TextMeshProUGUI scoreDisplay;
     [SerializeField] [Range(0, 20)] private float ballPreviewLength;
+    [SerializeField] private TextMeshProUGUI highScoreDisplay;
+    [SerializeField] private int autoSaveTime;
 
     public static GameManager Instance { get; private set; }
     public bool InLaunchPrep { get; set; }
     public Camera MainCam { get; private set; }
 
-
     private List<GameObject> _brickPool;
+
     private int _score;
+    //private bool _gameEnd;
+    private Guid _gameGuid;
 
     private void Awake()
     {
@@ -36,23 +41,37 @@ public class GameManager : MonoBehaviour
     {
         InLaunchPrep = true;
         MainCam = Camera.main;
+        _score = 0;
+        //_gameEnd = false;
+        _gameGuid = Guid.NewGuid();
 
         InstantiateBlocks();
-    }
-
-    private void Update()
-    {
-        if (Input.GetKeyDown(KeyCode.R))
-        {
-            Restart();
-        }
-
-        scoreDisplay.text = _score.ToString();
+        DisplayHighScore();
+        StartCoroutine(AutoSave(autoSaveTime));
     }
 
     public void Restart()
     {
+        _gameGuid = Guid.NewGuid();
         SceneManager.LoadScene(0);
+    }
+
+    private void DisplayHighScore()
+    {
+        var data = SaveSystem.Instance.Load();
+        if (data == null || data.Count == 0)
+        {
+            highScoreDisplay.text = "-----HighScore-----\n none";
+            return;
+        }
+
+        var text = "-----HighScore-----\n";
+        foreach (var pd in data)
+        {
+            text += $" [{pd.GetName()}]-{pd.GetScore()}  ";
+        }
+
+        highScoreDisplay.text = text;
     }
 
     private void InstantiateBlocks()
@@ -65,7 +84,6 @@ public class GameManager : MonoBehaviour
             for (var j = -10; j <= 10; j++)
             {
                 temp = Instantiate(brickPrefab, new Vector2((float) i / 5, (float) j / 4), Quaternion.identity);
-                //temp.SetActive(false);
                 _brickPool.Add(temp);
             }
         }
@@ -98,5 +116,27 @@ public class GameManager : MonoBehaviour
     public void AddScore(int num)
     {
         _score += num;
+        scoreDisplay.text = _score.ToString();
+    }
+
+    public void Fail()
+    {
+        //_gameEnd = true;
+    }
+
+    public void Save(string n)
+    {
+        var data = new PlayerData(_score, n, _gameGuid);
+        SaveSystem.Instance.Save(data);
+    }
+
+    private IEnumerator AutoSave(int time)
+    {
+        if (time < 1) time = 1;
+        while (true)
+        {
+            yield return new WaitForSeconds(time);
+            Save("zym");
+        }
     }
 }
