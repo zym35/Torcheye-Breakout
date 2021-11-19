@@ -13,6 +13,8 @@ public class GameManager : MonoBehaviour
     [SerializeField] [Range(0, 20)] private float ballPreviewLength;
     [SerializeField] private TextMeshProUGUI highScoreDisplay;
     [SerializeField] private int autoSaveTime;
+    [SerializeField] private TextMeshProUGUI timer;
+    [SerializeField] private GameObject fail;
 
     public static GameManager Instance { get; private set; }
     public bool InLaunchPrep { get; set; }
@@ -21,8 +23,8 @@ public class GameManager : MonoBehaviour
     private List<GameObject> _brickPool;
 
     private int _score;
-    //private bool _gameEnd;
     private Guid _gameGuid;
+    private int _countdown;
 
     private void Awake()
     {
@@ -42,18 +44,29 @@ public class GameManager : MonoBehaviour
         InLaunchPrep = true;
         MainCam = Camera.main;
         _score = 0;
-        //_gameEnd = false;
         _gameGuid = Guid.NewGuid();
+        _countdown = 60;
+        Time.timeScale = 1;
+        fail.SetActive(false);
 
         InstantiateBlocks();
         DisplayHighScore();
         StartCoroutine(AutoSave(autoSaveTime));
+        StartCoroutine(CountDown());
     }
 
     public void Restart()
     {
         _gameGuid = Guid.NewGuid();
         SceneManager.LoadScene(0);
+    }
+
+    public void Fail()
+    {
+        fail.SetActive(true);
+        Time.timeScale = 0;
+        StopCoroutine(nameof(AutoSave));
+        StopCoroutine(nameof(CountDown));
     }
 
     private void DisplayHighScore()
@@ -119,10 +132,6 @@ public class GameManager : MonoBehaviour
         scoreDisplay.text = _score.ToString();
     }
 
-    public void Fail()
-    {
-        //_gameEnd = true;
-    }
 
     public void Save(string n)
     {
@@ -137,6 +146,22 @@ public class GameManager : MonoBehaviour
         {
             yield return new WaitForSeconds(time);
             Save("zym");
+        }
+    }
+
+    private IEnumerator CountDown()
+    {
+        timer.text = _countdown.ToString();
+        while (true)
+        {
+            yield return new WaitForSeconds(1);
+            _countdown--;
+            timer.text = _countdown.ToString();
+            if (_countdown == 0)
+            {
+                Save("zym");
+                Fail();
+            }
         }
     }
 }
