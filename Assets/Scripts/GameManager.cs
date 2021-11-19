@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
@@ -10,29 +9,34 @@ class GameManager : MonoBehaviour
     [SerializeField] private GameObject brickPrefab;
     [SerializeField] private LineRenderer ballPreviewLineRenderer;
     [SerializeField] private TextMeshProUGUI scoreDisplay;
+    [SerializeField] [Range(0, 20)] private float ballPreviewLength;
+
+    public static GameManager Instance { get; private set; }
+    public bool InLaunchPrep { get; set; }
+    public Camera MainCam { get; private set; }
+
 
     private List<GameObject> _brickPool;
     private int _score;
-    
-    public static bool InLaunchPrep { get; set; }
-    public static GameManager Gm { get; private set; }
 
     private void Awake()
     {
         //Singleton pattern
-        if (Gm != null && Gm != this)
+        if (Instance != null && Instance != this)
         {
             Destroy(gameObject);
         }
         else
         {
-            Gm = this;
+            Instance = this;
         }
     }
 
     private void Start()
     {
         InLaunchPrep = true;
+        MainCam = Camera.main;
+
         InstantiateBlocks();
     }
 
@@ -42,6 +46,7 @@ class GameManager : MonoBehaviour
         {
             Restart();
         }
+
         scoreDisplay.text = _score.ToString();
     }
 
@@ -73,8 +78,21 @@ class GameManager : MonoBehaviour
 
     public void DrawBallPreview(Vector2 ballPos, Vector2 targetPos)
     {
+        var dir = (targetPos - ballPos).normalized;
+
+        var hit = Physics2D.Raycast(ballPos, dir, ballPreviewLength);
+        Vector2 dest;
+        if (hit.collider == null)
+        {
+            dest = dir * ballPreviewLength + ballPos;
+        }
+        else
+        {
+            dest = hit.point;
+        }
+
         ballPreviewLineRenderer.SetPosition(0, ballPos);
-        ballPreviewLineRenderer.SetPosition(1, targetPos);
+        ballPreviewLineRenderer.SetPosition(1, dest);
     }
 
     public void AddScore(int num)
