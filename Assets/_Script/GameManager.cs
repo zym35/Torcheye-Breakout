@@ -1,21 +1,14 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
 public class GameManager : MonoBehaviour
 {
     [SerializeField] private GameObject brickPrefab;
-    [SerializeField] private LineRenderer ballPreviewLineRenderer;
-    [SerializeField] private TextMeshProUGUI scoreDisplay;
-    [SerializeField] [Range(0, 20)] private float ballPreviewLength;
-    [SerializeField] private TextMeshProUGUI highScoreDisplay;
     [SerializeField] private int autoSaveTime;
-    [SerializeField] private TextMeshProUGUI timer;
-    [SerializeField] private GameObject fail;
-
+    
     public static GameManager Instance { get; private set; }
     public bool InLaunchPrep { get; set; }
     public Camera MainCam { get; private set; }
@@ -47,10 +40,9 @@ public class GameManager : MonoBehaviour
         _gameGuid = Guid.NewGuid();
         _countdown = 60;
         Time.timeScale = 1;
-        fail.SetActive(false);
 
         InstantiateBlocks();
-        DisplayHighScore();
+        UIManager.Instance.DisplayHighScore();
         StartCoroutine(AutoSave(autoSaveTime));
         StartCoroutine(CountDown());
     }
@@ -63,28 +55,10 @@ public class GameManager : MonoBehaviour
 
     public void Fail()
     {
-        fail.SetActive(true);
+        UIManager.Instance.Fail();
         Time.timeScale = 0;
         StopCoroutine(nameof(AutoSave));
         StopCoroutine(nameof(CountDown));
-    }
-
-    private void DisplayHighScore()
-    {
-        var data = SaveSystem.Instance.Load();
-        if (data == null || data.Count == 0)
-        {
-            highScoreDisplay.text = "-----HighScore-----\n none";
-            return;
-        }
-
-        var text = "-----HighScore-----\n";
-        foreach (var pd in data)
-        {
-            text += $" [{pd.GetName()}]-{pd.GetScore()}  ";
-        }
-
-        highScoreDisplay.text = text;
     }
 
     private void InstantiateBlocks()
@@ -102,38 +76,13 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    public void SetBallPreview(bool active)
-    {
-        ballPreviewLineRenderer.enabled = active;
-    }
-
-    public void DrawBallPreview(Vector2 ballPos, Vector2 targetPos)
-    {
-        var dir = (targetPos - ballPos).normalized;
-
-        var hit = Physics2D.Raycast(ballPos, dir, ballPreviewLength);
-        Vector2 dest;
-        if (hit.collider == null)
-        {
-            dest = dir * ballPreviewLength + ballPos;
-        }
-        else
-        {
-            dest = hit.point;
-        }
-
-        ballPreviewLineRenderer.SetPosition(0, ballPos);
-        ballPreviewLineRenderer.SetPosition(1, dest);
-    }
-
     public void AddScore(int num)
     {
         _score += num;
-        scoreDisplay.text = _score.ToString();
+        UIManager.Instance.DisplayScore(_score);
     }
 
-
-    public void Save(string n)
+    private void Save(string n)
     {
         var data = new PlayerData(_score, n, _gameGuid);
         SaveSystem.Instance.Save(data);
@@ -151,12 +100,12 @@ public class GameManager : MonoBehaviour
 
     private IEnumerator CountDown()
     {
-        timer.text = _countdown.ToString();
+        UIManager.Instance.DisplayTimer(_countdown);
         while (true)
         {
             yield return new WaitForSeconds(1);
             _countdown--;
-            timer.text = _countdown.ToString();
+            UIManager.Instance.DisplayTimer(_countdown);
             if (_countdown == 0)
             {
                 Save("zym");

@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
 using System.IO;
-using System.Linq;
 using System.Runtime.Serialization.Formatters.Binary;
 
 public class SaveSystem : MonoBehaviour
@@ -9,7 +8,7 @@ public class SaveSystem : MonoBehaviour
     // Makes it a singleton / single instance
     public static SaveSystem Instance;
     private string _filePath;
-    private List<PlayerData> tempData;
+    private List<PlayerData> _tempData;
 
     private void Awake()
     {
@@ -27,19 +26,18 @@ public class SaveSystem : MonoBehaviour
 
     public void Save(PlayerData saveData)
     {
-        Debug.Log("Saving data...");
         var dataStream = new FileStream(_filePath, FileMode.Create);
         var converter = new BinaryFormatter();
 
         List<PlayerData> data;
-        if (tempData != null)
+        if (_tempData != null)
         {
-            data = tempData;
-            for (int i = 0; i < tempData.Count; i++)
+            data = _tempData;
+            for (int i = 0; i < _tempData.Count; i++)
             {
-                if (tempData[i].ExactEqual(saveData))
+                if (_tempData[i].ExactEqual(saveData))
                 {
-                    tempData[i] = saveData;
+                    _tempData[i] = saveData;
                     converter.Serialize(dataStream, data);
                     dataStream.Close();
                     return;
@@ -62,7 +60,6 @@ public class SaveSystem : MonoBehaviour
 
     public List<PlayerData> Load()
     {
-        Debug.Log("Loading data...");
         if (File.Exists(_filePath))
         {
             var dataStream = new FileStream(_filePath, FileMode.Open);
@@ -77,8 +74,8 @@ public class SaveSystem : MonoBehaviour
             var saveData = converter.Deserialize(dataStream) as List<PlayerData>;
 
             dataStream.Close();
-            tempData = saveData;
-            tempData.Sort();
+            _tempData = saveData;
+            if (_tempData != null) _tempData.Sort();
             return saveData;
         }
 

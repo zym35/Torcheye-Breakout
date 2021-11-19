@@ -30,19 +30,19 @@ public class Ball : MonoBehaviour
         var mousePos = InputManager.GetMouseWorldPosition();
         if (Input.GetMouseButtonDown(0))
         {
-            GameManager.Instance.SetBallPreview(true);
+            UIManager.Instance.SetBallPreview(true);
         }
 
         if (Input.GetMouseButton(0))
         {
-            GameManager.Instance.DrawBallPreview(transform.position, mousePos);
+            UIManager.Instance.DrawBallPreview(transform.position, mousePos);
         }
 
         if (Input.GetMouseButtonUp(0))
         {
             var dir = (mousePos - (Vector2) transform.position).normalized;
             _rigidbody.velocity = dir * speed;
-            GameManager.Instance.SetBallPreview(false);
+            UIManager.Instance.SetBallPreview(false);
             GameManager.Instance.InLaunchPrep = false;
         }
     }
