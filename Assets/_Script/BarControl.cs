@@ -3,6 +3,14 @@ using UnityEngine;
 
 public class BarControl : MonoBehaviour
 {
+    private AreaEffector2D forceField;
+    //private 
+
+    private void Start()
+    {
+        forceField = GetComponentInChildren<AreaEffector2D>();
+    }
+
     private void Update()
     {
         if (!GameManager.Instance.InLaunchPrep && Input.GetMouseButton(0))

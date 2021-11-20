@@ -23,6 +23,8 @@ public class Ball : MonoBehaviour
         {
             GameManager.Instance.Fail();
         }
+        
+        _rigidbody.velocity = Vector2.ClampMagnitude(_rigidbody.velocity, speed);
     }
 
     private void LaunchPrep()
