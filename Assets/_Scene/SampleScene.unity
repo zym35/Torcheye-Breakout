@@ -186,7 +186,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   pointPrefab: {fileID: 2164660097314119223, guid: 8accc5b7d815225488abde79fa335393, type: 3}
   field: {fileID: 90029104}
-  space: 0.1
+  pointSpace: 0.1
+  waveRadius: 0.797
 --- !u!4 &90029102
 Transform:
   m_ObjectHideFlags: 0
